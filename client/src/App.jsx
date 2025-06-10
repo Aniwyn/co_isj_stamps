@@ -4,7 +4,7 @@ import { useReactToPrint } from "react-to-print"
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline"
 import { format } from "date-fns"
 import DataPicker from "./components/DataPicker.jsx"
-import PdfPreview from "./components/pdfPreview.jsx"
+import PdfPreview from "./components/PdfPreview.jsx"
 import fetchPdf from "./utils/pdfFetch.js"
 
 
