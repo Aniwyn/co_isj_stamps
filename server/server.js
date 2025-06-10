@@ -6,6 +6,8 @@ const pdfParse = require('pdf-parse')
 const app = express()
 app.use(cors())
 
+app.get('/', (req, res) => { res.send('API OK...') })
+
 app.get('/api/pdf', async (req, res) => {
   const url = req.query.url
   if (!url) return res.status(400).send('Falta la URL')
@@ -14,17 +16,17 @@ app.get('/api/pdf', async (req, res) => {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept': 'application/pdf',
       },
       redirect: 'follow',
     })
 
     if (!response.ok) {
-      console.error('Status:', response.status)
+      console.log('Status:', response.status)
       return res.status(502).send('No se pudo descargar el PDF (status ' + response.status + ')')
     }
+    console.log("Respondido: ", response.status)
 
     const bufferFetch = await response.arrayBuffer()
     const buffer = Buffer.from(bufferFetch)
@@ -40,7 +42,7 @@ app.get('/api/pdf', async (req, res) => {
   }
 })
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5001
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  console.log(`Server running on port ${PORT}`)
+})
