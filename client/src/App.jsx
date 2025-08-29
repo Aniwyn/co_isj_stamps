@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Card, CardHeader, CardBody, Input, Button, Typography, Select, Option } from "@material-tailwind/react"
 import { useReactToPrint } from "react-to-print"
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline"
@@ -9,7 +9,7 @@ import fetchPdf from "./utils/pdfFetch.js"
 
 
 export default function App() {
-    const [diagnostic, setDiagnostic] = useState("")
+    const [diagnostic, setDiagnostic] = useState("H531")
     const [url, setUrl] = useState("")
     const [date, setDate] = useState(new Date())
     const [medic, setMedic] = useState({})
@@ -99,6 +99,20 @@ export default function App() {
         },
     ]
 
+    useEffect(() => {
+        const getUrl = async () => {
+            const params = new URLSearchParams(window.location.search)
+            const genosurl = params.get("genosurl")
+            if (genosurl) {
+                console.log("URL capturada desde la extension: ", genosurl)
+                await setUrl(genosurl)
+                await handleFetch(genosurl)
+            }
+        }
+
+        getUrl()
+    }, [])
+
     const handleUrl = (e) => setUrl(e.target.value)
     const handleDiagnostic = (e) => { setDiagnostic(e.target.value) }
     const handleMedic = (e) => {
@@ -108,9 +122,10 @@ export default function App() {
         }
     }
 
-    const handleFetch = () => {
+    const handleFetch = (urlParam) => {
         const fecthAsyncPDF = async () => {
-            const { modifiedPdf, text } = await fetchPdf(url)
+            const urlToFetch = url || urlParam
+            const { modifiedPdf, text } = await fetchPdf(urlToFetch)
             setPdfData(modifiedPdf)
 
             const foundStamp = STAMPS.find(stamp => new RegExp(`\\n${stamp.mp_to_find}\\n`).test(text))
