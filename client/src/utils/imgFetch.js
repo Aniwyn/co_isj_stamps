@@ -4,7 +4,7 @@ const BASE_URL = import.meta.env.VITE_API_URL
 
 const fetchPdf = async (url) => {
     try {
-        const response = await fetch(`${BASE_URL}/pdf?url=${encodeURIComponent(url)}`)
+        const response = await fetch(`${BASE_URL}/pdf2img?url=${encodeURIComponent(url)}`)
         const { pdf, text } = await response.json()
 
         const binary = Uint8Array.from(atob(pdf), c => c.charCodeAt(0))
@@ -25,7 +25,7 @@ const fetchPdf = async (url) => {
         // const modifiedBlob = new Blob([modifiedPdf], { type: 'application/pdf' })
         // const modifiedUrl = URL.createObjectURL(modifiedBlob)
         // window.open(modifiedUrl, '_blank')
-        //console.log("PDF: ", text)
+        console.log("PDF: ", text)
 
         return { modifiedPdf, text }
     } catch (err) {

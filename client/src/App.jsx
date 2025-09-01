@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react"
-import { Card, CardHeader, CardBody, Input, Button, Typography, Select, Option } from "@material-tailwind/react"
+import { Alert, Card, CardHeader, CardBody, Input, Button, Typography, Select, Option } from "@material-tailwind/react"
 import { useReactToPrint } from "react-to-print"
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline"
 import { format } from "date-fns"
@@ -14,6 +14,8 @@ export default function App() {
     const [date, setDate] = useState(new Date())
     const [medic, setMedic] = useState({})
     const [pdfData, setPdfData] = useState(null)
+    const [warningState, setWarningState] = useState(false)
+    const [alertMessage, setAlertMessage] = useState("")
     const contentRef = useRef(null)
 
     const STAMPS = [
@@ -23,7 +25,8 @@ export default function App() {
             prof: "Médica cirujana",
             esp: "Esp. Oftalmología",
             mp: "M.P. 3831",
-            mp_to_find: "3831"
+            mp_to_find: "3831",
+            name_to_compare: "ASE ANDREA VERONICA" //check
         },
         {
             ID: "ALCOBA",
@@ -31,7 +34,8 @@ export default function App() {
             prof: "Médico Especialista",
             esp: "En Oftalmología",
             mp: "M.P. 3971 - M.N. 153821",
-            mp_to_find: "3971"
+            mp_to_find: "3971",
+            name_to_compare: "ALCOBA EMILIO"
         },
         {
             ID: "SIUFIE",
@@ -39,7 +43,8 @@ export default function App() {
             prof: "Médico cirujano",
             esp: "Esp. Oftalmología",
             mp: "M.P. 1398",
-            mp_to_find: "1398"
+            mp_to_find: "1398",
+            name_to_compare: "SIUFI ERNESTO" //check
         },
         {
             ID: "SIUFIL",
@@ -47,7 +52,8 @@ export default function App() {
             prof: "Médico cirujano",
             esp: "Esp. Oftalmología",
             mp: "M.P. 3280",
-            mp_to_find: "3280"
+            mp_to_find: "3280",
+            name_to_compare: "SIUFI LUCAS" //check
         },
         {
             ID: "ZARIFJ",
@@ -55,7 +61,8 @@ export default function App() {
             prof: "Médico cirujano",
             esp: "Esp. Oftalmología",
             mp: "M.P. 2010",
-            mp_to_find: "2010"
+            mp_to_find: "2010",
+            name_to_compare: "ZARIF JOSE LUIS" //check
         },
         {
             ID: "ZARIFA",
@@ -63,7 +70,8 @@ export default function App() {
             prof: "Médica cirujana",
             esp: "Esp. Oftalmología",
             mp: "M.P. 4035",
-            mp_to_find: "4035"
+            mp_to_find: "4035",
+            name_to_compare: "ZARIF AGUSTINA"
         },
         {
             ID: "MAITE",
@@ -71,7 +79,8 @@ export default function App() {
             prof: "Médica cirujana",
             esp: "Esp. Oftalmología",
             mp: "M.P. 4124",
-            mp_to_find: "4124"
+            mp_to_find: "4124",
+            name_to_compare: "DIPIERRI MAITE"
         },
         {
             ID: "TONELLI",
@@ -79,7 +88,8 @@ export default function App() {
             prof: "Médica cirujana",
             esp: "Esp. Oftalmología",
             mp: "M.P. 3328",
-            mp_to_find: "3328"
+            mp_to_find: "3328",
+            name_to_compare: "TONELLI MARIELA"
         },
         {
             ID: "ABUD",
@@ -87,7 +97,8 @@ export default function App() {
             prof: "Médica",
             esp: "M.P. 4156",
             mp: "",
-            mp_to_find: "4156"
+            mp_to_find: "4156",
+            name_to_compare: "ABUD VALERIA SOLEDAD" //check
         },
         {
             ID: "JURE",
@@ -95,8 +106,9 @@ export default function App() {
             prof: "Médico cirujano",
             esp: "Esp. Oftalmología",
             mp: "M.P. 2883",
-            mp_to_find: "2883"
-        },
+            mp_to_find: "2883",
+            name_to_compare: "JURE FRANCISCO JOSE" //check
+        }
     ]
 
     useEffect(() => {
@@ -127,11 +139,29 @@ export default function App() {
             const urlToFetch = url || urlParam
             const { modifiedPdf, text } = await fetchPdf(urlToFetch)
             setPdfData(modifiedPdf)
+            console.log(text)
 
-            const foundStamp = STAMPS.find(stamp => new RegExp(`\\n${stamp.mp_to_find}\\n`).test(text))
+            //onst foundStamp = STAMPS.find(stamp => new RegExp(`\\n${stamp.mp_to_find}\\n`).test(text)) QUEDO OBSOLETO
+            const foundStamp = STAMPS.find(stamp => new RegExp(`MD\\s*-\\s*${stamp.mp_to_find}\\s*-`).test(text))
             if (foundStamp) {
                 setMedic(foundStamp)
-                console.log("Médico encontrado:", foundStamp.name)
+                console.log("Médico encontrado (por matrícula):", foundStamp.name_to_compare)
+
+                const nameLineMatch = text.match(/Centro Atenc\.:\s*\n([A-ZÁÉÍÓÚÑ\s]+)\nCLINICA DE OJOS/)
+                if (nameLineMatch) {
+                    const medicName = nameLineMatch[1].trim()
+                    console.log("Médico en línea de abajo: ", medicName, "\nMédico (sello) encontrado: ", foundStamp.name_to_compare)
+
+                    if (medicName.toUpperCase() !== foundStamp.name_to_compare.toUpperCase()) {
+                        setAlertMessage("Advertencia: el médico ")
+                        setWarningState(true)
+                    } else {
+                        setWarningState(false)
+                    }
+                } else {
+                    setAlertMessage("Advertencia: No se encontro segunda Linea")
+                    setWarningState(false) // Preguntar si es una alerta esto
+                }
             }
         }
 
@@ -145,14 +175,14 @@ export default function App() {
             <div className="flex justify-center items-center w-1/2" id="preview-content">
                 <div className="relative print-content" ref={contentRef} id="preview">
                     <>
-                    <p className="absolute top-[378px] left-[220px] w-[120px] text-center text-sm z-[99] text-xs">{(date && pdfData) ? format(date, "dd / MM / yyyy") : ""}</p>
-                    <p className="absolute top-[423px] left-[75px] w-[100px] text-center text-sm z-[99] text-xs">{(diagnostic && pdfData) ? diagnostic : ""}</p>
-                    <div>
-                        <p className="absolute text-[0.8rem] top-[435px] left-[50px] w-[150px] text-center z-[99] text-sm">{(medic.name && pdfData) ? medic.name : ""}</p>
-                        <p className="absolute text-[0.6rem] top-[448px] left-[50px] w-[150px] text-center z-[99] text-xs">{(medic.prof && pdfData) ? medic.prof : ""}</p>
-                        <p className="absolute text-[0.6rem] top-[457px] left-[50px] w-[150px] text-center z-[99] text-xs">{(medic.esp && pdfData) ? medic.esp : ""}</p>
-                        <p className="absolute text-[0.6rem] top-[466px] left-[50px] w-[150px] text-center z-[99] text-xs">{(medic.mp && pdfData) ? medic.mp : ""}</p>
-                    </div>
+                        <p className="absolute top-[378px] left-[220px] w-[120px] text-center text-sm z-[99] text-xs">{(date && pdfData) ? format(date, "dd / MM / yyyy") : ""}</p>
+                        <p className="absolute top-[423px] left-[75px] w-[100px] text-center text-sm z-[99] text-xs">{(diagnostic && pdfData) ? diagnostic : ""}</p>
+                        <div>
+                            <p className="absolute text-[0.8rem] top-[435px] left-[50px] w-[150px] text-center z-[99] text-sm">{(medic.name && pdfData) ? medic.name : ""}</p>
+                            <p className="absolute text-[0.6rem] top-[448px] left-[50px] w-[150px] text-center z-[99] text-xs">{(medic.prof && pdfData) ? medic.prof : ""}</p>
+                            <p className="absolute text-[0.6rem] top-[457px] left-[50px] w-[150px] text-center z-[99] text-xs">{(medic.esp && pdfData) ? medic.esp : ""}</p>
+                            <p className="absolute text-[0.6rem] top-[466px] left-[50px] w-[150px] text-center z-[99] text-xs">{(medic.mp && pdfData) ? medic.mp : ""}</p>
+                        </div>
                     </>
                     <div className="relative">
                         {pdfData && <PdfPreview file={pdfData} />}
@@ -215,6 +245,14 @@ export default function App() {
                                     <DataPicker date={date} setDate={setDate} />
                                 </div>
                             </div>
+                            {
+                                warningState ?
+                                    <div className="pt-5">
+                                        <Alert color="amber">{alertMessage}</Alert>
+                                    </div>
+                                    :
+                                    <></>
+                            }
                             <Button className="mt-5" size="lg" onClick={handlePrint}>
                                 Imprimir receta
                             </Button>
