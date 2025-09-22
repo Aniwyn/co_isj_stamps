@@ -89,7 +89,7 @@ export default function App() {
             esp: "Esp. Oftalmología",
             mp: "M.P. 3328",
             mp_to_find: "3328",
-            name_to_compare: "TONELLI MARIELA"
+            name_to_compare: "TONELLI MARIELA SUSANA" //check
         },
         {
             ID: "ABUD",
@@ -121,7 +121,6 @@ export default function App() {
                 await handleFetch(genosurl)
             }
         }
-
         getUrl()
     }, [])
 
@@ -141,11 +140,16 @@ export default function App() {
             setPdfData(modifiedPdf)
             console.log(text)
 
-            //onst foundStamp = STAMPS.find(stamp => new RegExp(`\\n${stamp.mp_to_find}\\n`).test(text)) QUEDO OBSOLETO
-            const foundStamp = STAMPS.find(stamp => new RegExp(`MD\\s*-\\s*${stamp.mp_to_find}\\s*-`).test(text))
+            //onst foundStamp1 = STAMPS.find(stamp => new RegExp(`\\n${stamp.mp_to_find}\\n`).test(text)) QUEDO OBSOLETO
+            //const foundStamp2 = STAMPS.find(stamp => new RegExp(`MD\\s*-\\s*${stamp.mp_to_find}\\s*-`).test(text))
+            const foundStamp = STAMPS.find(stamp => {
+                const regex = new RegExp(`(?:MD\\s*-\\s*${stamp.mp_to_find}\\s*-|\\s-\\s*MP\\s*${stamp.mp_to_find})`)
+                return regex.test(text)
+            })
+            
             if (foundStamp) {
                 setMedic(foundStamp)
-                console.log("Médico encontrado (por matrícula):", foundStamp.name_to_compare)
+                console.log("Médico encontrado: ", foundStamp.name_to_compare)
 
                 const nameLineMatch = text.match(/Centro Atenc\.:\s*\n([A-ZÁÉÍÓÚÑ\s]+)\nCLINICA DE OJOS/)
                 if (nameLineMatch) {
@@ -153,7 +157,7 @@ export default function App() {
                     console.log("Médico en línea de abajo: ", medicName, "\nMédico (sello) encontrado: ", foundStamp.name_to_compare)
 
                     if (medicName.toUpperCase() !== foundStamp.name_to_compare.toUpperCase()) {
-                        setAlertMessage("Advertencia: el médico ")
+                        setAlertMessage("Advertencia: el médico prestador y el medico solicitante no coinciden.")
                         setWarningState(true)
                     } else {
                         setWarningState(false)
@@ -215,8 +219,8 @@ export default function App() {
                                 />
                                 <Button className="ms-4" onClick={handleFetch}>Buscar</Button>
                             </div>
-                            <div className="mt-2 flex flex-row gap-4">
-                                <div>
+                            <div className="mt-2 grid grid-cols-9 gap-4">
+                                <div className="col-span-3">
                                     <Input
                                         label="Diagnostico"
                                         placeholder="H53"
@@ -227,7 +231,7 @@ export default function App() {
                                         icon={<DocumentIcon className="h-4 w-4 text-gray-500" />}
                                     />
                                 </div>
-                                <div>
+                                <div className="col-span-3">
                                     <Select
                                         variant="static"
                                         label="Médico"
@@ -241,7 +245,7 @@ export default function App() {
                                         ))}
                                     </Select>
                                 </div>
-                                <div>
+                                <div className="col-span-3">
                                     <DataPicker date={date} setDate={setDate} />
                                 </div>
                             </div>

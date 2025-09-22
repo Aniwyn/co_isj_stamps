@@ -15,16 +15,16 @@ const fetchPdf = async (url) => {
         const page = pdfDoc.getPages()[0]
         const { width, height } = page.getSize()
 
-        const newHeight = 440
+        const newHeight = 430
         const yOffset = height - newHeight
         page.setMediaBox(0, yOffset, width, newHeight)
 
         const modifiedPdf = await pdfDoc.save()
 
         // Solo para pruebas
-        // const modifiedBlob = new Blob([modifiedPdf], { type: 'application/pdf' })
-        // const modifiedUrl = URL.createObjectURL(modifiedBlob)
-        // window.open(modifiedUrl, '_blank')
+        //const modifiedBlob = new Blob([modifiedPdf], { type: 'application/pdf' })
+        //const modifiedUrl = URL.createObjectURL(modifiedBlob)
+        //window.open(modifiedUrl, '_blank')
         //console.log("PDF: ", text)
 
         return { modifiedPdf, text }
